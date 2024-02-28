@@ -7,6 +7,16 @@
 #include "MathUtils.h"
 #include "Geom.h"
 
+inline Gdiplus::Point ToGdiplus(const Pos<int> p)
+{
+    return Gdiplus::Point(INT(p.x), INT(p.y));
+}
+
+inline Gdiplus::PointF ToGdiplus(const Pos<double> p)
+{
+    return Gdiplus::PointF(Gdiplus::REAL(p.x), Gdiplus::REAL(p.y));
+}
+
 template<class T>
 class Map
 {
@@ -22,23 +32,23 @@ public:
 
     Size size() const { return m_sz; }
 
-    bool valid(Pos p) const
+    bool valid(const Pos<int> p) const
     {
         return p.x >= 0 && p.y >= 0 && p.x < m_sz.w && p.y < m_sz.h;
     }
 
-    T& operator[](Pos p)
+    T& operator[](const Pos<int> p)
     {
         return m_Data[ToIndex(p)];
     }
 
-    const T& operator[](Pos p) const
+    const T& operator[](const Pos<int> p) const
     {
         return m_Data[ToIndex(p)];
     }
 
 private:
-    int ToIndex(Pos p) const
+    int ToIndex(const Pos<int> p) const
     {
         return p.y * m_sz.w + p.x;
     }
@@ -47,42 +57,32 @@ private:
     std::vector<T> m_Data;
 };
 
-inline Gdiplus::Point ToGdiplus(Pos p)
-{
-    return Gdiplus::Point(INT(p.x), INT(p.y));
-}
-
-inline Gdiplus::PointF ToGdiplus(PosF p)
-{
-    return Gdiplus::PointF(Gdiplus::REAL(p.x), Gdiplus::REAL(p.y));
-}
-
 Gdiplus::Point ray(const Gdiplus::Point s, double a, double l)
 {
     //Gdiplus::PointF dir(Gdiplus::REAL(std::cos(-a)), Gdiplus::REAL(std::sin(-a)));
-    Gdiplus::PointF dir(ToGdiplus(FromAngle(a)));
+    Gdiplus::PointF dir(ToGdiplus(FromAngle<double>(a)));
     //return Gdiplus::Point(INT(s.X + dir.X * l + 0.5), INT(s.Y + dir.Y * l + 0.5));
     return ToD(ToF(s) + dir * Gdiplus::REAL(l) + Gdiplus::PointF(0.5, 0.5));
 }
 
 struct Intersection
 {
-    Pos map;
+    Pos<int> map;
     double len;
-    PosF point;
+    Pos<double> point;
 };
 
 template <class F>
-Intersection intersect(const PosF vRayStart, double a, F f)
+Intersection intersect(const Pos<double> vRayStart, double a, F f)
 {
-    const PosF vRayDir(normalize(PosF({ std::cos(a), -std::sin(a) })));
-    const PosF vRayUnitStepSize({ std::sqrt(sq(vRayDir.y / vRayDir.x) + 1), std::sqrt(sq(vRayDir.x / vRayDir.y) + 1) });
+    const Pos<double> vRayDir(normalize(Pos<double>({ std::cos(a), -std::sin(a) })));
+    const Pos<double> vRayUnitStepSize({ std::sqrt(sq(vRayDir.y / vRayDir.x) + 1), std::sqrt(sq(vRayDir.x / vRayDir.y) + 1) });
 
-    Pos vMapCheck({ int(vRayStart.x), int(vRayStart.y) });
-    const Pos vStep({ sgn(vRayDir.x), sgn(vRayDir.y) });
+    Pos<int> vMapCheck({ int(vRayStart.x), int(vRayStart.y) });
+    const Pos<int> vStep({ sgn(vRayDir.x), sgn(vRayDir.y) });
 
-    PosF vRayLength1D(
-        PosF({
+    Pos<double> vRayLength1D(
+        Pos<double>({
             vStep.x < 0 ? vRayStart.x - vMapCheck.x : vMapCheck.x + 1 - vRayStart.x,
             vStep.y < 0 ? vRayStart.y - vMapCheck.y : vMapCheck.y + 1 - vRayStart.y
             }) * vRayUnitStepSize);
@@ -114,7 +114,7 @@ public:
     {
         Create(TEXT("RadWolf"), 800, 600);
         m_Map = Map<Gdiplus::Color>(Size({ 10, 10 }));
-        Pos p;
+        Pos<int> p;
         for (p.y = 0; p.y < m_Map.size().h; ++p.y)
         {
             for (p.x = 0; p.x < m_Map.size().w; ++p.x)
@@ -132,7 +132,7 @@ public:
         {
             m_Map[p] = Gdiplus::Color::Red;
         }
-        m_player = PosF({ 5.5, 7.5 });
+        m_player = Pos<double>({ 5.5, 7.5 });
     }
 
     void Update(DWORD ms) override
@@ -142,13 +142,13 @@ public:
         if (GetKeyDown('D')) m_a -= deg2rad(1) * (ms / 10.0);
         if (GetKeyDown('W'))
         {
-            const Intersection inter = intersect(m_player, m_a, [&m = m_Map](Pos vMapCheck) { return !m.valid(vMapCheck) || m[vMapCheck].GetValue() != Gdiplus::Color::White; });
-            m_player += FromAngle(m_a) * std::min((ms / 100.0), inter.len - 0.1);
+            const Intersection inter = intersect(m_player, m_a, [&m = m_Map](const Pos<int> vMapCheck) { return !m.valid(vMapCheck) || m[vMapCheck].GetValue() != Gdiplus::Color::White; });
+            m_player += FromAngle<double>(m_a) * std::min((ms / 100.0), inter.len - 0.1);
         }
         if (GetKeyDown('S'))
         {
-            const Intersection inter = intersect(m_player, m_a - deg2rad(180), [&m = m_Map](Pos vMapCheck) { return !m.valid(vMapCheck) || m[vMapCheck].GetValue() != Gdiplus::Color::White; });
-            m_player -= FromAngle(m_a) * std::min((ms / 100.0), inter.len - 0.1);
+            const Intersection inter = intersect(m_player, m_a - deg2rad(180), [&m = m_Map](const Pos<int> vMapCheck) { return !m.valid(vMapCheck) || m[vMapCheck].GetValue() != Gdiplus::Color::White; });
+            m_player -= FromAngle<double>(m_a) * std::min((ms / 100.0), inter.len - 0.1);
         }
     }
 
@@ -169,7 +169,7 @@ public:
         for (int x = 0; x < sz.Width; ++x)
         {
             const double i = naive_lerp(fov / 2, -fov / 2, double(x) / sz.Width);
-            const Intersection inter = intersect(m_player, m_a + deg2rad(i), [&m = m_Map](Pos vMapCheck) { return !m.valid(vMapCheck) || m[vMapCheck].GetValue() != Gdiplus::Color::White; });
+            const Intersection inter = intersect(m_player, m_a + deg2rad(i), [&m = m_Map](const Pos<int> vMapCheck) { return !m.valid(vMapCheck) || m[vMapCheck].GetValue() != Gdiplus::Color::White; });
             intersections[x] = inter;
         }
 
@@ -194,7 +194,7 @@ public:
         {
             const Gdiplus::Pen pen_grid(Gdiplus::Color::Black);
 
-            Pos p;
+            Pos<int> p;
             for (p.y = 0; p.y < m_Map.size().h; ++p.y)
             {
                 for (p.x = 0; p.x < m_Map.size().w; ++p.x)
@@ -212,7 +212,7 @@ public:
             const Gdiplus::Point pt1(ToD(ToGdiplus(m_player) * tsz));
             for (int x = 0; x < sz.Width; ++x)
             {
-                const PosF pt2 = intersections[x].point;
+                const Pos<double> pt2 = intersections[x].point;
                 g->DrawLine(&pen_intersection, pt1, ToD(ToGdiplus(pt2) * tsz));
             }
 
@@ -225,7 +225,7 @@ public:
 
 private:
     Map<Gdiplus::Color> m_Map;
-    PosF m_player;
+    Pos<double> m_player;
     double m_a = deg2rad(80);
 };
 

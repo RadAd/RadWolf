@@ -6,65 +6,69 @@ struct Size
     int h;
 };
 
+template <class T>
 struct Pos
 {
-    int x;
-    int y;
+    T x;
+    T y;
 };
 
-struct PosF
+template <class T>
+inline Pos<T> operator+(const Pos<T> p1, const Pos<T> p2)
 {
-    double x;
-    double y;
-};
-
-inline PosF operator+(const PosF p1, const PosF p2)
-{
-    return PosF({ p1.x + p2.x, p1.y + p2.y });
+    return Pos<T>({ p1.x + p2.x, p1.y + p2.y });
 }
 
-inline PosF operator-(const PosF p1, const PosF p2)
+template <class T>
+inline Pos<T> operator-(const Pos<T> p1, const Pos<T> p2)
 {
-    return PosF({ p1.x - p2.x, p1.y - p2.y });
+    return Pos<T>({ p1.x - p2.x, p1.y - p2.y });
 }
 
-inline PosF& operator+=(PosF& p1, const PosF p2)
+template <class T>
+inline Pos<T>& operator+=(Pos<T>& p1, const Pos<T> p2)
 {
     p1.x += p2.x;
     p1.y += p2.y;
     return p1;
 }
 
-inline PosF& operator-=(PosF& p1, const PosF p2)
+template <class T>
+inline Pos<T>& operator-=(Pos<T>& p1, const Pos<T> p2)
 {
     p1.x -= p2.x;
     p1.y -= p2.y;
     return p1;
 }
 
-inline PosF operator*(PosF p, const double v)
+template <class T>
+inline Pos<T> operator*(Pos<T> p, const double v)
 {
     p.x *= v;
     p.y *= v;
     return p;
 }
 
-inline PosF operator*(const PosF p1, const PosF p2)
+template <class T>
+inline Pos<T> operator*(const Pos<T> p1, const Pos<T> p2)
 {
-    return PosF({ p1.x * p2.x, p1.y * p2.y });
+    return Pos<T>({ p1.x * p2.x, p1.y * p2.y });
 }
 
-inline double lensq(const PosF p)
+template <class T>
+inline double lensq(const Pos<T> p)
 {
     return sq(p.x) + sq(p.y);
 }
 
-inline double len(const PosF p)
+template <class T>
+inline double len(const Pos<T> p)
 {
     return sqrt(lensq(p));
 }
 
-inline PosF normalize(PosF p)
+template <class T>
+inline Pos<T> normalize(Pos<T> p)
 {
     const double l = len(p);
     p.x /= l;
@@ -72,7 +76,8 @@ inline PosF normalize(PosF p)
     return p;
 }
 
-inline PosF FromAngle(double a)
+template <class T>
+inline Pos<T> FromAngle(double a)
 {
-    return PosF({ std::cos(-a), std::sin(-a) });
+    return Pos<T>({ std::cos(-a), std::sin(-a) });
 }
