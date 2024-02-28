@@ -60,7 +60,7 @@ private:
 Gdiplus::Point ray(const Gdiplus::Point s, double a, double l)
 {
     //Gdiplus::PointF dir(Gdiplus::REAL(std::cos(-a)), Gdiplus::REAL(std::sin(-a)));
-    Gdiplus::PointF dir(ToGdiplus(FromAngle<double>(a)));
+    Gdiplus::PointF dir(ToGdiplus(FromAngle(a)));
     //return Gdiplus::Point(INT(s.X + dir.X * l + 0.5), INT(s.Y + dir.Y * l + 0.5));
     return ToD(ToF(s) + dir * Gdiplus::REAL(l) + Gdiplus::PointF(0.5, 0.5));
 }
@@ -143,12 +143,12 @@ public:
         if (GetKeyDown('W'))
         {
             const Intersection inter = intersect(m_player, m_a, [&m = m_Map](const Pos<int> vMapCheck) { return !m.valid(vMapCheck) || m[vMapCheck].GetValue() != Gdiplus::Color::White; });
-            m_player += FromAngle<double>(m_a) * std::min((ms / 100.0), inter.len - 0.1);
+            m_player += FromAngle(m_a) * std::min((ms / 100.0), inter.len - 0.1);
         }
         if (GetKeyDown('S'))
         {
             const Intersection inter = intersect(m_player, m_a - deg2rad(180), [&m = m_Map](const Pos<int> vMapCheck) { return !m.valid(vMapCheck) || m[vMapCheck].GetValue() != Gdiplus::Color::White; });
-            m_player -= FromAngle<double>(m_a) * std::min((ms / 100.0), inter.len - 0.1);
+            m_player -= FromAngle(m_a) * std::min((ms / 100.0), inter.len - 0.1);
         }
     }
 

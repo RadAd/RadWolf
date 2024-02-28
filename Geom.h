@@ -42,11 +42,15 @@ inline Pos<T>& operator-=(Pos<T>& p1, const Pos<T> p2)
 }
 
 template <class T>
-inline Pos<T> operator*(Pos<T> p, const double v)
+inline Pos<T> operator*(const Pos<T> p, const T v)
 {
-    p.x *= v;
-    p.y *= v;
-    return p;
+    return Pos<T>({ p.x * v, p.y * v });
+}
+
+template <class T>
+inline Pos<T> operator/(const Pos<T> p, const T v)
+{
+    return Pos<T>({ p.x / v, p.y / v });
 }
 
 template <class T>
@@ -55,29 +59,23 @@ inline Pos<T> operator*(const Pos<T> p1, const Pos<T> p2)
     return Pos<T>({ p1.x * p2.x, p1.y * p2.y });
 }
 
-template <class T>
-inline double lensq(const Pos<T> p)
+inline double lensq(const Pos<double> p)
 {
     return sq(p.x) + sq(p.y);
 }
 
-template <class T>
-inline double len(const Pos<T> p)
+inline double len(const Pos<double> p)
 {
     return sqrt(lensq(p));
 }
 
-template <class T>
-inline Pos<T> normalize(Pos<T> p)
+inline Pos<double> normalize(const Pos<double> p)
 {
     const double l = len(p);
-    p.x /= l;
-    p.y /= l;
-    return p;
+    return p / l;
 }
 
-template <class T>
-inline Pos<T> FromAngle(double a)
+inline Pos<double> FromAngle(double a)
 {
-    return Pos<T>({ std::cos(-a), std::sin(-a) });
+    return Pos<double>({ std::cos(-a), std::sin(-a) });
 }
