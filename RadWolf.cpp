@@ -4,52 +4,8 @@
 #include "RGE/GdiplusUtils.h"
 #include "RGE/Geometry.h"
 
-//#define _USE_MATH_DEFINES
-//#include <math.h>
-#define M_PI       3.14159265358979323846   // pi
-
-#include <cmath>
-#include <algorithm>
-
-template <typename T>
-inline T sq(T x)
-{
-    return x * x;
-}
-
-template <typename T>
-inline int sgn(T val)
-{
-    return (T(0) < val) - (val < T(0));
-}
-
-inline double deg2rad(double d)
-{
-    return d * M_PI / 180.0;
-}
-
-double naive_lerp(double a, double b, double t)
-{
-    return a + t * (b - a);
-}
-
-struct Size
-{
-    int w;
-    int h;
-};
-
-struct Pos
-{
-    int x;
-    int y;
-};
-
-struct PosF
-{
-    double x;
-    double y;
-};
+#include "MathUtils.h"
+#include "Geom.h"
 
 template<class T>
 class Map
@@ -91,95 +47,9 @@ private:
     std::vector<T> m_Data;
 };
 
-Gdiplus::Point ToD(const Gdiplus::PointF p)
+inline Gdiplus::Point ToGdiplus(Pos p)
 {
-    return Gdiplus::Point(INT(p.X + 0.5), INT(p.Y + 0.5));
-}
-
-Gdiplus::Point operator*(const Pos p, const Gdiplus::Size sz)
-{
-    return Gdiplus::Point(p.x * sz.Width, p.y * sz.Height);
-}
-
-PosF operator+(const PosF p1, const PosF p2)
-{
-    return PosF({ p1.x + p2.x, p1.y + p2.y });
-}
-
-PosF operator-(const PosF p1, const PosF p2)
-{
-    return PosF({ p1.x - p2.x, p1.y - p2.y });
-}
-
-PosF& operator+=(PosF& p1, const PosF p2)
-{
-    p1.x += p2.x;
-    p1.y += p2.y;
-    return p1;
-}
-
-PosF& operator-=(PosF& p1, const PosF p2)
-{
-    p1.x -= p2.x;
-    p1.y -= p2.y;
-    return p1;
-}
-
-PosF operator*(PosF p, const double v)
-{
-    p.x *= v;
-    p.y *= v;
-    return p;
-}
-
-Gdiplus::PointF operator*(const PosF p, const Gdiplus::Size sz)
-{
-    return Gdiplus::PointF(Gdiplus::REAL(p.x * sz.Width), Gdiplus::REAL(p.y * sz.Height));
-}
-
-PosF operator*(const PosF p1, const PosF p2)
-{
-    return PosF({ p1.x * p2.x, p1.y * p2.y });
-}
-
-Gdiplus::PointF operator*(const Gdiplus::PointF p, const Gdiplus::Size sz)
-{
-    return Gdiplus::PointF(p.X * sz.Width, p.Y * sz.Height);
-}
-
-Gdiplus::PointF operator*(const Gdiplus::PointF p1, const Gdiplus::PointF p2)
-{
-    return Gdiplus::PointF(p1.X * p2.X, p1.Y * p2.Y);
-}
-
-inline Gdiplus::PointF operator*(Gdiplus::PointF p, Gdiplus::REAL f)
-{
-    p.X *= f;
-    p.Y *= f;
-    return p;
-}
-
-inline double lensq(const PosF p)
-{
-    return sq(p.x) + sq(p.y);
-}
-
-inline double len(const PosF p)
-{
-    return sqrt(lensq(p));
-}
-
-inline PosF normalize(PosF p)
-{
-    const double l = len(p);
-    p.x /= l;
-    p.y /= l;
-    return p;
-}
-
-inline PosF FromAngle(double a)
-{
-    return PosF({ std::cos(-a), std::sin(-a) });
+    return Gdiplus::Point(INT(p.x), INT(p.y));
 }
 
 inline Gdiplus::PointF ToGdiplus(PosF p)
@@ -330,7 +200,7 @@ public:
                 for (p.x = 0; p.x < m_Map.size().w; ++p.x)
                 {
                     const Gdiplus::SolidBrush brush_grid(m_Map[p]);
-                    const Gdiplus::Rect r(p * tsz, tsz);
+                    const Gdiplus::Rect r(ToGdiplus(p) * tsz, tsz);
                     g->FillRectangle(&brush_grid, r);
                     g->DrawRectangle(&pen_grid, r);
                 }
@@ -339,11 +209,11 @@ public:
 
         {
             const Gdiplus::Pen pen_intersection(Gdiplus::Color::Blue);
-            const Gdiplus::Point pt1(ToD(m_player * tsz));
+            const Gdiplus::Point pt1(ToD(ToGdiplus(m_player) * tsz));
             for (int x = 0; x < sz.Width; ++x)
             {
                 const PosF pt2 = intersections[x].point;
-                g->DrawLine(&pen_intersection, pt1, ToD(pt2 * tsz));
+                g->DrawLine(&pen_intersection, pt1, ToD(ToGdiplus(pt2) * tsz));
             }
 
             const Gdiplus::Pen pen_ray(Gdiplus::Color::Red);

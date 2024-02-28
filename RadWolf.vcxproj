@@ -52,6 +52,10 @@
       <Project>{b7db5f77-52af-4318-8204-35629ca8c8e7}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Geom.h" />
+    <ClInclude Include="MathUtils.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

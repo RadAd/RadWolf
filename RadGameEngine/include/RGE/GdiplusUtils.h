@@ -29,6 +29,11 @@ inline Gdiplus::PointF ToF(Gdiplus::Point p)
     return { static_cast<Gdiplus::REAL>(p.X), static_cast<Gdiplus::REAL>(p.Y) };
 }
 
+inline Gdiplus::Point ToD(const Gdiplus::PointF p)
+{
+    return Gdiplus::Point(INT(p.X + 0.5), INT(p.Y + 0.5));
+}
+
 inline Gdiplus::Point& operator+=(Gdiplus::Point& p1, Gdiplus::Point p2)
 {
     p1 = p1 + p2;
@@ -131,6 +136,26 @@ inline Gdiplus::SizeF operator/(Gdiplus::SizeF sz, INT f)
     sz.Width /= f;
     sz.Height /= f;
     return sz;
+}
+
+inline Gdiplus::Point operator*(const Gdiplus::Point p, const Gdiplus::Size sz)
+{
+    return Gdiplus::Point(p.X * sz.Width, p.Y * sz.Height);
+}
+
+inline Gdiplus::PointF operator*(const Gdiplus::PointF p, const Gdiplus::Size sz)
+{
+    return Gdiplus::PointF(p.X * sz.Width, p.Y * sz.Height);
+}
+
+inline Gdiplus::PointF operator*(const Gdiplus::PointF p1, const Gdiplus::PointF p2)
+{
+    return Gdiplus::PointF(p1.X * p2.X, p1.Y * p2.Y);
+}
+
+inline Gdiplus::PointF operator*(Gdiplus::PointF p, Gdiplus::REAL f)
+{
+    return Gdiplus::PointF(p.X * f, p.Y * f);
 }
 
 class StringLines
